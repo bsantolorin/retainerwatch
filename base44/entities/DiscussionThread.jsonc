@@ -1,0 +1,70 @@
+{
+  "name": "DiscussionThread",
+  "type": "object",
+  "properties": {
+    "billing_entry_id": {
+      "type": "string",
+      "description": "Reference to BillingEntry"
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Reference to Case"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client email"
+    },
+    "attorney_email": {
+      "type": "string",
+      "description": "Attorney email"
+    },
+    "billing_description": {
+      "type": "string",
+      "description": "Billing entry description for context"
+    },
+    "billing_amount": {
+      "type": "number",
+      "description": "Billing entry amount for context"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "open",
+        "resolved"
+      ],
+      "default": "open"
+    },
+    "messages": {
+      "type": "array",
+      "description": "Thread messages",
+      "items": {
+        "type": "object",
+        "properties": {
+          "sender_email": {
+            "type": "string"
+          },
+          "sender_name": {
+            "type": "string"
+          },
+          "sender_role": {
+            "type": "string",
+            "enum": [
+              "attorney",
+              "client"
+            ]
+          },
+          "text": {
+            "type": "string"
+          },
+          "timestamp": {
+            "type": "string"
+          }
+        }
+      }
+    }
+  },
+  "required": [
+    "billing_entry_id",
+    "case_id"
+  ]
+}

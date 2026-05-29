@@ -5,55 +5,71 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import ScrollToTop from './components/ScrollToTop';
-// Add page imports here
+import { useState, useEffect } from 'react';
+import { base44 } from '@/api/base44Client';
+import AppLayout from '@/components/layout/AppLayout';
+import HomePage from '@/pages/HomePage';
+import CasesPage from '@/pages/CasesPage';
+import CaseDetailPage from '@/pages/CaseDetailPage';
+import NewCasePage from '@/pages/NewCasePage';
+import BillingPage from '@/pages/BillingPage';
+import ClientsPage from '@/pages/ClientsPage';
+import NotificationsPage from '@/pages/NotificationsPage';
+import { Toaster as Sonner } from 'sonner';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
+  const [user, setUser] = useState(null);
 
-  // Show loading spinner while checking app public settings or auth
+  useEffect(() => {
+    base44.auth.me().then(setUser).catch(() => {});
+  }, []);
+
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
-      <div className="fixed inset-0 flex items-center justify-center">
-        <div className="w-8 h-8 border-4 border-slate-200 border-t-slate-800 rounded-full animate-spin"></div>
+      <div className="fixed inset-0 flex items-center justify-center bg-sidebar">
+        <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
       </div>
     );
   }
 
-  // Handle authentication errors
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
     } else if (authError.type === 'auth_required') {
-      // Redirect to login automatically
       navigateToLogin();
       return null;
     }
   }
 
-  // Render the main app
   return (
     <Routes>
-      {/* Add your page Route elements here */}
+      <Route element={<AppLayout user={user} />}>
+        <Route path="/" element={<HomePage />} />
+        <Route path="/cases" element={<CasesPage />} />
+        <Route path="/cases/new" element={<NewCasePage />} />
+        <Route path="/cases/:id" element={<CaseDetailPage />} />
+        <Route path="/billing" element={<BillingPage />} />
+        <Route path="/clients" element={<ClientsPage />} />
+        <Route path="/notifications" element={<NotificationsPage />} />
+      </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>
   );
 };
 
-
 function App() {
-
   return (
     <AuthProvider>
       <QueryClientProvider client={queryClientInstance}>
         <Router>
-          <ScrollToTop />
           <AuthenticatedApp />
         </Router>
         <Toaster />
+        <Sonner richColors position="top-right" />
       </QueryClientProvider>
     </AuthProvider>
-  )
+  );
 }
 
-export default App
+export default App;

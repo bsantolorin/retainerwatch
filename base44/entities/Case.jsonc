@@ -1,0 +1,57 @@
+{
+  "name": "Case",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Case title"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client user email"
+    },
+    "client_name": {
+      "type": "string",
+      "description": "Client display name"
+    },
+    "attorney_email": {
+      "type": "string",
+      "description": "Attorney user email"
+    },
+    "attorney_name": {
+      "type": "string",
+      "description": "Attorney display name"
+    },
+    "initial_retainer": {
+      "type": "number",
+      "description": "Initial retainer deposit amount"
+    },
+    "current_balance": {
+      "type": "number",
+      "description": "Current retainer balance"
+    },
+    "alert_threshold": {
+      "type": "number",
+      "description": "Low balance alert threshold"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "closed",
+        "pending"
+      ],
+      "default": "active"
+    },
+    "description": {
+      "type": "string",
+      "description": "Case description/notes"
+    }
+  },
+  "required": [
+    "title",
+    "client_email",
+    "attorney_email",
+    "initial_retainer"
+  ]
+}

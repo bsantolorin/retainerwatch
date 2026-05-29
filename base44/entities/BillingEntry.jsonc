@@ -1,0 +1,68 @@
+{
+  "name": "BillingEntry",
+  "type": "object",
+  "properties": {
+    "case_id": {
+      "type": "string",
+      "description": "Reference to Case"
+    },
+    "case_title": {
+      "type": "string",
+      "description": "Case title for display"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client email for filtering"
+    },
+    "attorney_email": {
+      "type": "string",
+      "description": "Attorney email for filtering"
+    },
+    "type": {
+      "type": "string",
+      "enum": [
+        "hourly",
+        "flat_fee",
+        "expense"
+      ],
+      "description": "Billing type"
+    },
+    "description": {
+      "type": "string",
+      "description": "Description of work"
+    },
+    "amount": {
+      "type": "number",
+      "description": "Billing amount"
+    },
+    "hours": {
+      "type": "number",
+      "description": "Hours worked (for hourly type)"
+    },
+    "rate": {
+      "type": "number",
+      "description": "Hourly rate (for hourly type)"
+    },
+    "date": {
+      "type": "string",
+      "format": "date",
+      "description": "Date of service"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "normal",
+        "flagged",
+        "resolved"
+      ],
+      "default": "normal"
+    }
+  },
+  "required": [
+    "case_id",
+    "type",
+    "description",
+    "amount",
+    "date"
+  ]
+}
