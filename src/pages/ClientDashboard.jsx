@@ -1,12 +1,75 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { DollarSign, FileText, Flag, AlertTriangle, ArrowRight } from 'lucide-react';
-import MetricCard from '@/components/shared/MetricCard';
-import PageHeader from '@/components/shared/PageHeader';
+import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
+import { MessageSquareWarning, Calendar, Clock, FileText, ArrowRight, ChevronRight } from 'lucide-react';
+import CircularGauge from '@/components/client/CircularGauge';
+import FlagEntryModal from '@/components/billing/FlagEntryModal';
 import StatusBadge from '@/components/shared/StatusBadge';
-import { AreaChart, Area, XAxis, YAxis, Tooltip, ResponsiveContainer } from 'recharts';
-import { format, subDays } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+function StatChip({ icon: Icon, label, value, color = 'text-white/70' }) {
+  return (
+    <div className="flex flex-col items-center gap-1 bg-white/5 rounded-2xl px-4 py-3 flex-1 min-w-0 border border-white/10">
+      <Icon className={cn('w-4 h-4', color)} />
+      <span className="text-lg font-bold text-white leading-none">{value}</span>
+      <span className="text-[10px] text-white/40 text-center uppercase tracking-wide leading-tight">{label}</span>
+    </div>
+  );
+}
+
+function BillingCard({ entry, user, onRefresh }) {
+  const [flagging, setFlagging] = useState(false);
+  const isFlagged = entry.status === 'flagged';
+  const isResolved = entry.status === 'resolved';
+
+  return (
+    <div className="bg-white/5 rounded-2xl border border-white/10 p-4 space-y-3">
+      <div className="flex items-start justify-between gap-3">
+        <div className="flex-1 min-w-0">
+          <p className="text-sm font-semibold text-white leading-snug">{entry.description}</p>
+          <p className="text-xs text-white/40 mt-0.5">{entry.case_title || '—'} · {entry.date ? format(new Date(entry.date), 'MMM d, yyyy') : ''}</p>
+        </div>
+        <div className="text-right shrink-0">
+          <p className="text-base font-bold text-white">${entry.amount?.toFixed(2)}</p>
+          {entry.hours && (
+            <p className="text-xs text-white/40 mt-0.5">{entry.hours}h @ ${entry.rate}/hr</p>
+          )}
+        </div>
+      </div>
+
+      <div className="flex items-center justify-between">
+        <StatusBadge status={entry.status} />
+        {!isFlagged && !isResolved && (
+          <button
+            onClick={() => setFlagging(true)}
+            className="flex items-center gap-1.5 text-xs font-medium text-amber hover:text-amber/80 transition-colors bg-amber/10 hover:bg-amber/20 px-3 py-1.5 rounded-full"
+          >
+            <MessageSquareWarning className="w-3 h-3" />
+            Question this charge
+          </button>
+        )}
+        {isFlagged && (
+          <Link
+            to={`/billing`}
+            className="flex items-center gap-1 text-xs text-amber/70"
+          >
+            Under review <ChevronRight className="w-3 h-3" />
+          </Link>
+        )}
+      </div>
+
+      {flagging && (
+        <FlagEntryModal
+          entry={entry}
+          user={user}
+          onClose={() => setFlagging(false)}
+          onSaved={onRefresh}
+        />
+      )}
+    </div>
+  );
+}
 
 export default function ClientDashboard() {
   const { user } = useOutletContext();
@@ -14,141 +77,104 @@ export default function ClientDashboard() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    async function load() {
-      const [c, e] = await Promise.all([
-        base44.entities.Case.filter({ client_email: user.email }),
-        base44.entities.BillingEntry.filter({ client_email: user.email }, '-date', 50),
-      ]);
-      setCases(c);
-      setEntries(e);
-      setLoading(false);
-    }
-    load();
-  }, [user.email]);
+  const load = async () => {
+    const [c, e] = await Promise.all([
+      base44.entities.Case.filter({ client_email: user.email }),
+      base44.entities.BillingEntry.filter({ client_email: user.email }, '-date', 50),
+    ]);
+    setCases(c);
+    setEntries(e);
+    setLoading(false);
+  };
 
-  const totalBalance = cases.reduce((s, c) => s + (c.current_balance || 0), 0);
-  const flaggedCount = entries.filter(e => e.status === 'flagged').length;
-  const totalCharged = entries.reduce((s, e) => s + (e.amount || 0), 0);
-  const lowBalance = cases.some(c => c.current_balance != null && c.alert_threshold != null && c.current_balance <= c.alert_threshold);
+  useEffect(() => { load(); }, [user.email]);
 
-  // Build balance chart data from entries
-  const chartData = (() => {
-    if (!cases[0]) return [];
-    const initial = cases[0].initial_retainer || 0;
-    const sorted = [...entries].sort((a, b) => new Date(a.date) - new Date(b.date));
-    let balance = initial;
-    const points = [{ date: 'Start', balance: initial }];
-    sorted.forEach(e => {
-      balance -= e.amount;
-      points.push({ date: format(new Date(e.date), 'MMM d'), balance: Math.max(balance, 0) });
-    });
-    return points.slice(-12);
-  })();
+  // Primary case (first active)
+  const primaryCase = cases.find(c => c.status === 'active') || cases[0];
+  const balance = primaryCase?.current_balance ?? 0;
+  const initial = primaryCase?.initial_retainer ?? 0;
+  const pct = initial > 0 ? (balance / initial) * 100 : 0;
 
-  const recentEntries = entries.slice(0, 6);
+  const balanceColor =
+    pct > 50 ? 'text-emerald-400' :
+    pct > 25 ? 'text-amber' :
+    'text-red-400';
+
+  // Stat chip calculations
+  const now = new Date();
+  const entriesThisMonth = entries.filter(e => {
+    const d = new Date(e.date);
+    return d >= startOfMonth(now) && d <= endOfMonth(now);
+  }).length;
+
+  const hoursThisWeek = entries
+    .filter(e => { const d = new Date(e.date); return d >= startOfWeek(now) && d <= endOfWeek(now); })
+    .reduce((s, e) => s + (e.hours || 0), 0);
+
+  const recentEntries = entries.slice(0, 3);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
-      <PageHeader
-        title={`Hello, ${user.full_name?.split(' ')[0] || 'there'}`}
-        subtitle="Your retainer overview"
-      />
-
-      {lowBalance && (
-        <div className="mb-6 flex items-center gap-3 bg-amber/10 border border-amber/30 text-amber rounded-xl px-4 py-3 text-sm font-medium">
-          <AlertTriangle className="w-4 h-4 shrink-0" />
-          Your retainer balance is running low. Please contact your attorney to discuss a top-up.
-        </div>
-      )}
-
-      <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-8">
-        <MetricCard title="Retainer Balance" value={`$${totalBalance.toLocaleString('en-US', { minimumFractionDigits: 2 })}`} icon={DollarSign} variant={lowBalance ? 'amber' : 'green'} className="col-span-2 lg:col-span-1" />
-        <MetricCard title="Total Charged" value={`$${totalCharged.toLocaleString('en-US', { minimumFractionDigits: 2 })}`} icon={FileText} variant="primary" />
-        <MetricCard title="Flagged Entries" value={flaggedCount} icon={Flag} variant={flaggedCount > 0 ? 'amber' : 'default'} />
+    <div className="min-h-screen bg-sidebar">
+      {/* Hero Section */}
+      <div className="px-5 pt-8 pb-6">
+        <p className="text-white/40 text-sm uppercase tracking-widest mb-1">Welcome back</p>
+        <h1 className="text-2xl font-bold text-white">{user.full_name?.split(' ')[0] || 'Client'}</h1>
+        {primaryCase && (
+          <p className="text-white/40 text-xs mt-1 truncate">{primaryCase.title}</p>
+        )}
       </div>
 
-      <div className="grid lg:grid-cols-3 gap-6">
-        {/* Balance Chart */}
-        <div className="lg:col-span-2 bg-card rounded-xl border border-border p-5">
-          <h2 className="font-semibold text-sm mb-4">Balance History</h2>
-          {chartData.length < 2 ? (
-            <div className="h-40 flex items-center justify-center text-muted-foreground text-sm">Not enough data yet.</div>
-          ) : (
-            <ResponsiveContainer width="100%" height={180}>
-              <AreaChart data={chartData}>
-                <defs>
-                  <linearGradient id="balGrad" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="hsl(217,91%,60%)" stopOpacity={0.2} />
-                    <stop offset="95%" stopColor="hsl(217,91%,60%)" stopOpacity={0} />
-                  </linearGradient>
-                </defs>
-                <XAxis dataKey="date" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} tickFormatter={v => `$${v}`} />
-                <Tooltip formatter={v => [`$${v.toFixed(2)}`, 'Balance']} />
-                <Area type="monotone" dataKey="balance" stroke="hsl(217,91%,60%)" fill="url(#balGrad)" strokeWidth={2} />
-              </AreaChart>
-            </ResponsiveContainer>
-          )}
-        </div>
-
-        {/* Cases */}
-        <div className="bg-card rounded-xl border border-border overflow-hidden">
-          <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-            <h2 className="font-semibold text-sm">My Cases</h2>
-            <Link to="/cases" className="text-xs text-primary hover:underline flex items-center gap-1">All <ArrowRight className="w-3 h-3" /></Link>
-          </div>
-          {loading ? (
-            <div className="p-6 text-center text-muted-foreground text-sm">Loading...</div>
-          ) : cases.length === 0 ? (
-            <div className="p-6 text-center text-muted-foreground text-sm">No cases yet.</div>
-          ) : (
-            <div className="divide-y divide-border">
-              {cases.map(c => (
-                <Link key={c.id} to={`/cases/${c.id}`} className="block px-5 py-4 hover:bg-muted/30 transition-colors">
-                  <p className="font-medium text-sm">{c.title}</p>
-                  <p className={`text-sm font-semibold mt-1 ${c.current_balance <= c.alert_threshold ? 'text-amber' : 'text-emerald-600'}`}>
-                    ${c.current_balance?.toFixed(2)} remaining
-                  </p>
-                  <StatusBadge status={c.status} className="mt-1" />
-                </Link>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Recent Charges */}
-      <div className="mt-6 bg-card rounded-xl border border-border overflow-hidden">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-border">
-          <h2 className="font-semibold text-sm">Recent Charges</h2>
-          <Link to="/billing" className="text-xs text-primary hover:underline flex items-center gap-1">All charges <ArrowRight className="w-3 h-3" /></Link>
-        </div>
+      {/* Circular Gauge + Balance */}
+      <div className="flex flex-col items-center gap-2 pb-6 px-5">
         {loading ? (
-          <div className="p-6 text-center text-muted-foreground text-sm">Loading...</div>
-        ) : recentEntries.length === 0 ? (
-          <div className="p-6 text-center text-muted-foreground text-sm">No charges yet.</div>
+          <div className="w-[200px] h-[200px] rounded-full bg-white/5 animate-pulse" />
         ) : (
-          <table className="w-full text-sm">
-            <thead className="bg-muted/50">
-              <tr>
-                <th className="text-left px-5 py-3 text-xs font-semibold text-muted-foreground">Description</th>
-                <th className="text-left px-3 py-3 text-xs font-semibold text-muted-foreground">Date</th>
-                <th className="text-right px-3 py-3 text-xs font-semibold text-muted-foreground">Amount</th>
-                <th className="text-left px-3 py-3 text-xs font-semibold text-muted-foreground">Status</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border">
-              {recentEntries.map(e => (
-                <tr key={e.id} className="hover:bg-muted/30 transition-colors">
-                  <td className="px-5 py-3 max-w-[200px] truncate">{e.description}</td>
-                  <td className="px-3 py-3 text-muted-foreground whitespace-nowrap">{e.date ? format(new Date(e.date), 'MMM d, yyyy') : '—'}</td>
-                  <td className="px-3 py-3 text-right font-medium">${e.amount?.toFixed(2)}</td>
-                  <td className="px-3 py-3"><StatusBadge status={e.status} /></td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
+          <CircularGauge pct={pct} />
+        )}
+        <div className="text-center -mt-2">
+          <p className="text-xs text-white/40 uppercase tracking-widest mb-1">Retainer Balance</p>
+          <p className={cn('text-4xl font-extrabold', balanceColor)}>
+            ${balance.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+          </p>
+          <p className="text-xs text-white/30 mt-1">
+            of ${initial.toLocaleString('en-US', { minimumFractionDigits: 2 })} initial
+          </p>
+        </div>
+      </div>
+
+      {/* Stat Chips */}
+      <div className="px-5 mb-6">
+        <div className="flex gap-2">
+          <StatChip icon={FileText} label="This Month" value={entriesThisMonth} color="text-blue-400" />
+          <StatChip icon={Calendar} label="Next Hearing" value="—" color="text-purple-400" />
+          <StatChip icon={Clock} label="Hrs This Week" value={hoursThisWeek.toFixed(1)} color="text-emerald-400" />
+          <StatChip icon={FileText} label="Documents" value="—" color="text-amber" />
+        </div>
+      </div>
+
+      {/* Recent Billing Entries */}
+      <div className="px-5 pb-10">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-sm font-semibold text-white/80">Recent Charges</h2>
+          <Link to="/billing" className="text-xs text-primary flex items-center gap-1 hover:underline">
+            View all <ArrowRight className="w-3 h-3" />
+          </Link>
+        </div>
+
+        {loading ? (
+          <div className="space-y-3">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-24 rounded-2xl bg-white/5 animate-pulse" />
+            ))}
+          </div>
+        ) : recentEntries.length === 0 ? (
+          <div className="text-center text-white/30 text-sm py-8">No charges yet.</div>
+        ) : (
+          <div className="space-y-3">
+            {recentEntries.map(e => (
+              <BillingCard key={e.id} entry={e} user={user} onRefresh={load} />
+            ))}
+          </div>
         )}
       </div>
     </div>
