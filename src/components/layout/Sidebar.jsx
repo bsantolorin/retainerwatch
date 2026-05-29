@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
-  LayoutDashboard, Briefcase, FileText, Bell, Users, ChevronLeft, ChevronRight, Scale, LogOut
+  LayoutDashboard, Briefcase, FileText, Bell, Users, ChevronLeft, ChevronRight, Scale, LogOut, ArrowLeftRight
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -24,7 +24,14 @@ const navItemsClient = [
 export default function Sidebar({ user }) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
+  const [switching, setSwitching] = useState(false);
   const isAttorney = user?.role === 'attorney';
+
+  const switchRole = async () => {
+    setSwitching(true);
+    await base44.auth.updateMe({ role: isAttorney ? 'client' : 'attorney' });
+    window.location.href = '/';
+  };
   const navItems = isAttorney ? navItemsAttorney : navItemsClient;
 
   return (
@@ -86,6 +93,15 @@ export default function Sidebar({ user }) {
             <p className="text-xs text-white/40 truncate">{user?.email}</p>
           </div>
         )}
+        <button
+          onClick={switchRole}
+          disabled={switching}
+          className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50', collapsed && 'justify-center')}
+          title={collapsed ? `Switch to ${isAttorney ? 'Client' : 'Attorney'}` : undefined}
+        >
+          <ArrowLeftRight className="w-4 h-4 shrink-0" />
+          {!collapsed && <span>{switching ? 'Switching…' : `Switch to ${isAttorney ? 'Client' : 'Attorney'}`}</span>}
+        </button>
         <button
           onClick={() => base44.auth.logout()}
           className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors', collapsed && 'justify-center')}
