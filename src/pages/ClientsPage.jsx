@@ -1,10 +1,15 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext, Link } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Search, AlertTriangle } from 'lucide-react';
+import { Search, AlertTriangle, UserPlus } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter,
+} from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
 
 export default function ClientsPage() {
   const { user } = useOutletContext();
@@ -12,6 +17,20 @@ export default function ClientsPage() {
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [inviteOpen, setInviteOpen] = useState(false);
+  const [inviteEmail, setInviteEmail] = useState('');
+  const [inviting, setInviting] = useState(false);
+  const [inviteMsg, setInviteMsg] = useState('');
+
+  const handleInvite = async () => {
+    if (!inviteEmail) return;
+    setInviting(true);
+    setInviteMsg('');
+    await base44.users.inviteUser(inviteEmail, 'user');
+    setInviteMsg(`Invitation sent to ${inviteEmail}`);
+    setInviteEmail('');
+    setInviting(false);
+  };
 
   useEffect(() => {
     Promise.all([
@@ -43,7 +62,43 @@ export default function ClientsPage() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <PageHeader title="Clients" subtitle="All clients and their retainer status" />
+      <PageHeader
+        title="Clients"
+        subtitle="All clients and their retainer status"
+        actions={
+          <Button size="sm" onClick={() => { setInviteOpen(true); setInviteMsg(''); }}>
+            <UserPlus className="w-4 h-4" />
+            Invite Client
+          </Button>
+        }
+      />
+
+      {/* Invite Dialog */}
+      <Dialog open={inviteOpen} onOpenChange={setInviteOpen}>
+        <DialogContent className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Invite a Client</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-3 py-2">
+            <Label htmlFor="invite-email">Client Email</Label>
+            <Input
+              id="invite-email"
+              type="email"
+              placeholder="client@example.com"
+              value={inviteEmail}
+              onChange={e => setInviteEmail(e.target.value)}
+              onKeyDown={e => e.key === 'Enter' && handleInvite()}
+            />
+            {inviteMsg && <p className="text-sm text-green-600">{inviteMsg}</p>}
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>
+            <Button onClick={handleInvite} disabled={inviting || !inviteEmail}>
+              {inviting ? 'Sending…' : 'Send Invite'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <div className="relative mb-5">
         <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />

@@ -26,6 +26,7 @@ export default function Sidebar({ user }) {
   const [collapsed, setCollapsed] = useState(false);
   const [switching, setSwitching] = useState(false);
   const isAttorney = user?.role === 'attorney';
+  const isAdmin = user?.role === 'admin';
 
   const switchRole = async () => {
     setSwitching(true);
@@ -93,15 +94,17 @@ export default function Sidebar({ user }) {
             <p className="text-xs text-white/40 truncate">{user?.email}</p>
           </div>
         )}
-        <button
-          onClick={switchRole}
-          disabled={switching}
-          className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50', collapsed && 'justify-center')}
-          title={collapsed ? `Switch to ${isAttorney ? 'Client' : 'Attorney'}` : undefined}
-        >
-          <ArrowLeftRight className="w-4 h-4 shrink-0" />
-          {!collapsed && <span>{switching ? 'Switching…' : `Switch to ${isAttorney ? 'Client' : 'Attorney'}`}</span>}
-        </button>
+        {isAdmin && (
+          <button
+            onClick={switchRole}
+            disabled={switching}
+            className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50', collapsed && 'justify-center')}
+            title={collapsed ? `Switch to ${isAttorney ? 'Client' : 'Attorney'}` : undefined}
+          >
+            <ArrowLeftRight className="w-4 h-4 shrink-0" />
+            {!collapsed && <span>{switching ? 'Switching…' : `Switch to ${isAttorney ? 'Client' : 'Attorney'}`}</span>}
+          </button>
+        )}
         <button
           onClick={() => base44.auth.logout()}
           className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors', collapsed && 'justify-center')}
