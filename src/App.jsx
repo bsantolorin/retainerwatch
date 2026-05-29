@@ -16,6 +16,7 @@ import BillingPage from '@/pages/BillingPage';
 import ClientsPage from '@/pages/ClientsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import LogBillingEntryPage from '@/pages/LogBillingEntryPage';
+import AttorneysPage from '@/pages/AttorneysPage';
 import { Toaster as Sonner } from 'sonner';
 
 const AuthenticatedApp = () => {
@@ -60,6 +61,7 @@ const AuthenticatedApp = () => {
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/billing/new" element={<LogBillingEntryPage />} />
+        <Route path="/attorneys" element={<AttorneysPage />} />
       </Route>
       <Route path="*" element={<PageNotFound />} />
     </Routes>

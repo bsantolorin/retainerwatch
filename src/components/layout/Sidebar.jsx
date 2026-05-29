@@ -11,6 +11,7 @@ const navItemsAttorney = [
   { label: 'Cases', icon: Briefcase, path: '/cases' },
   { label: 'Billing', icon: FileText, path: '/billing' },
   { label: 'Clients', icon: Users, path: '/clients' },
+  { label: 'Attorneys', icon: Scale, path: '/attorneys' },
   { label: 'Notifications', icon: Bell, path: '/notifications' },
 ];
 
