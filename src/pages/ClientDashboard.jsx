@@ -4,7 +4,7 @@ import { base44 } from '@/api/base44Client';
 import { format, startOfMonth, endOfMonth, startOfWeek, endOfWeek } from 'date-fns';
 import { MessageSquareWarning, Calendar, Clock, FileText, ArrowRight, ChevronRight } from 'lucide-react';
 import CircularGauge from '@/components/client/CircularGauge';
-import FlagEntryModal from '@/components/billing/FlagEntryModal';
+import QuestionChargeSheet from '@/components/billing/QuestionChargeSheet';
 import StatusBadge from '@/components/shared/StatusBadge';
 import { cn } from '@/lib/utils';
 
@@ -60,7 +60,7 @@ function BillingCard({ entry, user, onRefresh }) {
       </div>
 
       {flagging && (
-        <FlagEntryModal
+        <QuestionChargeSheet
           entry={entry}
           user={user}
           onClose={() => setFlagging(false)}
