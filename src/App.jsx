@@ -21,12 +21,13 @@ import { Toaster as Sonner } from 'sonner';
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
   const [user, setUser] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
 
   useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {});
+    base44.auth.me().then(setUser).catch(() => {}).finally(() => setUserLoading(false));
   }, []);
 
-  if (isLoadingPublicSettings || isLoadingAuth || user === null) {
+  if (isLoadingPublicSettings || isLoadingAuth || userLoading) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-sidebar">
         <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
