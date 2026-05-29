@@ -26,7 +26,7 @@ const AuthenticatedApp = () => {
     base44.auth.me().then(setUser).catch(() => {});
   }, []);
 
-  if (isLoadingPublicSettings || isLoadingAuth) {
+  if (isLoadingPublicSettings || isLoadingAuth || user === null) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-sidebar">
         <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
