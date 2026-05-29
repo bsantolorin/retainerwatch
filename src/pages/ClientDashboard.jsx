@@ -6,6 +6,7 @@ import { MessageSquareWarning, Calendar, Clock, FileText, ArrowRight, ChevronRig
 import CircularGauge from '@/components/client/CircularGauge';
 import QuestionChargeSheet from '@/components/billing/QuestionChargeSheet';
 import StatusBadge from '@/components/shared/StatusBadge';
+import AlertBanners from '@/components/client/AlertBanners';
 import { cn } from '@/lib/utils';
 
 function StatChip({ icon: Icon, label, value, color = 'text-white/70' }) {
@@ -75,15 +76,18 @@ export default function ClientDashboard() {
   const { user } = useOutletContext();
   const [cases, setCases] = useState([]);
   const [entries, setEntries] = useState([]);
+  const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const load = async () => {
-    const [c, e] = await Promise.all([
+    const [c, e, n] = await Promise.all([
       base44.entities.Case.filter({ client_email: user.email }),
       base44.entities.BillingEntry.filter({ client_email: user.email }, '-date', 50),
+      base44.entities.Notification.filter({ user_email: user.email }, '-created_date', 20),
     ]);
     setCases(c);
     setEntries(e);
+    setNotifications(n);
     setLoading(false);
   };
 
@@ -141,6 +145,9 @@ export default function ClientDashboard() {
           </p>
         </div>
       </div>
+
+      {/* Alert Banners */}
+      {!loading && <AlertBanners notifications={notifications} />}
 
       {/* Stat Chips */}
       <div className="px-5 mb-6">

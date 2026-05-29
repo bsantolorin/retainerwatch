@@ -8,6 +8,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import PageHeader from '@/components/shared/PageHeader';
 import { toast } from 'sonner';
+import { createBillingAlerts } from '@/lib/billingAlerts';
 import { cn } from '@/lib/utils';
 import { Calculator } from 'lucide-react';
 
@@ -72,27 +73,7 @@ export default function LogBillingEntryPage() {
     const newBalance = (selectedCase.current_balance || 0) - total;
     await base44.entities.Case.update(form.case_id, { current_balance: newBalance });
 
-    // Low balance notification
-    if (newBalance <= (selectedCase.alert_threshold || 0)) {
-      await Promise.all([
-        base44.entities.Notification.create({
-          user_email: selectedCase.client_email,
-          type: 'low_balance',
-          title: 'Low Retainer Balance',
-          message: `Your retainer for "${selectedCase.title}" is low: $${newBalance.toFixed(2)} remaining.`,
-          case_id: form.case_id,
-          read: false,
-        }),
-        base44.entities.Notification.create({
-          user_email: user.email,
-          type: 'low_balance',
-          title: 'Client Low Balance Alert',
-          message: `Retainer for "${selectedCase.title}" (${selectedCase.client_name}) is low: $${newBalance.toFixed(2)} remaining.`,
-          case_id: form.case_id,
-          read: false,
-        }),
-      ]);
-    }
+    await createBillingAlerts({ caseData: selectedCase, amount: total, newBalance, clientEmail: selectedCase.client_email });
 
     toast.success('Billing entry logged successfully.');
     navigate(`/cases/${form.case_id}`);

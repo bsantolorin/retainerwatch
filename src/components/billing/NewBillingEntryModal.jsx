@@ -7,6 +7,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
+import { createBillingAlerts } from '@/lib/billingAlerts';
 
 export default function NewBillingEntryModal({ caseData, user, onClose, onSaved }) {
   const [saving, setSaving] = useState(false);
@@ -46,27 +47,7 @@ export default function NewBillingEntryModal({ caseData, user, onClose, onSaved 
     const newBalance = (caseData.current_balance || 0) - amount;
     await base44.entities.Case.update(caseData.id, { current_balance: newBalance });
 
-    // Low balance notification
-    if (newBalance <= (caseData.alert_threshold || 0)) {
-      await Promise.all([
-        base44.entities.Notification.create({
-          user_email: caseData.client_email,
-          type: 'low_balance',
-          title: 'Low Retainer Balance',
-          message: `Your retainer for "${caseData.title}" is low: $${newBalance.toFixed(2)} remaining.`,
-          case_id: caseData.id,
-          read: false,
-        }),
-        base44.entities.Notification.create({
-          user_email: user.email,
-          type: 'low_balance',
-          title: 'Client Low Balance Alert',
-          message: `Retainer for "${caseData.title}" (${caseData.client_name}) is low: $${newBalance.toFixed(2)} remaining.`,
-          case_id: caseData.id,
-          read: false,
-        }),
-      ]);
-    }
+    await createBillingAlerts({ caseData, amount, newBalance, clientEmail: caseData.client_email });
 
     toast.success('Billing entry logged.');
     onSaved();
