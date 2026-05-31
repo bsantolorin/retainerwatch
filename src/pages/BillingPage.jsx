@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { useOutletContext } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
-import { Search } from 'lucide-react';
+import { Search, Plus } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
 import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import BillingEntryRow from '@/components/billing/BillingEntryRow';
+import AddBillingEntryModal from '@/components/billing/AddBillingEntryModal';
 
 export default function BillingPage() {
   const { user } = useOutletContext();
@@ -15,6 +17,7 @@ export default function BillingPage() {
   const [search, setSearch] = useState('');
   const [filterStatus, setFilterStatus] = useState('all');
   const [filterType, setFilterType] = useState('all');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   const load = () => {
     const filter = isAttorney ? { attorney_email: user.email } : { client_email: user.email };
@@ -38,7 +41,21 @@ export default function BillingPage() {
       <PageHeader
         title={isAttorney ? 'All Billing Entries' : 'My Charges'}
         subtitle={isAttorney ? 'View and manage all billing entries across cases' : 'All charges against your retainer'}
+        actions={isAttorney && (
+          <Button size="sm" onClick={() => setShowAddModal(true)}>
+            <Plus className="w-4 h-4" />
+            Add Billing Entry
+          </Button>
+        )}
       />
+
+      {showAddModal && (
+        <AddBillingEntryModal
+          user={user}
+          onClose={() => setShowAddModal(false)}
+          onSaved={() => { setShowAddModal(false); load(); }}
+        />
+      )}
 
       <div className="flex gap-3 mb-5 flex-wrap">
         <div className="relative flex-1 min-w-48">
