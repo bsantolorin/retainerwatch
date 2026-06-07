@@ -7,7 +7,7 @@ import {
 import { base44 } from '@/api/base44Client';
 
 const navItemsAttorney = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { label: 'Cases', icon: Briefcase, path: '/cases' },
   { label: 'Billing', icon: FileText, path: '/billing' },
   { label: 'Clients', icon: Users, path: '/clients' },
@@ -16,7 +16,7 @@ const navItemsAttorney = [
 ];
 
 const navItemsClient = [
-  { label: 'Dashboard', icon: LayoutDashboard, path: '/' },
+  { label: 'Dashboard', icon: LayoutDashboard, path: '/dashboard' },
   { label: 'My Cases', icon: Briefcase, path: '/cases' },
   { label: 'Charges', icon: FileText, path: '/billing' },
   { label: 'Notifications', icon: Bell, path: '/notifications' },
@@ -32,7 +32,7 @@ export default function Sidebar({ user }) {
   const switchRole = async () => {
     setSwitching(true);
     await base44.auth.updateMe({ role: isAttorney ? 'client' : 'attorney' });
-    window.location.href = '/';
+    window.location.href = '/dashboard';
   };
   const navItems = isAttorney ? navItemsAttorney : navItemsClient;
 
@@ -66,7 +66,7 @@ export default function Sidebar({ user }) {
       {/* Nav */}
       <nav className="flex-1 px-2 py-4 space-y-1">
         {navItems.map(({ label, icon: Icon, path }) => {
-          const active = location.pathname === path || (path !== '/' && location.pathname.startsWith(path));
+          const active = location.pathname === path || (path !== '/dashboard' && location.pathname.startsWith(path));
           return (
             <Link
               key={path}

@@ -27,6 +27,9 @@ const AuthenticatedApp = () => {
     if (isLoadingAuth || isLoadingPublicSettings) return;
     if (redirected.current) return;
 
+    const publicPaths = ['/', '/landing', '/login', '/register', '/forgot-password', '/reset-password'];
+    if (publicPaths.includes(window.location.pathname)) return;
+
     const needsLogin =
       (!authError && !user) ||
       (authError && authError.type === 'auth_required');
@@ -61,7 +64,7 @@ const AuthenticatedApp = () => {
   return (
     <Routes>
       <Route element={<AppLayout user={user} />}>
-        <Route path="/" element={<HomePage />} />
+        <Route path="/dashboard" element={<HomePage />} />
         <Route path="/cases" element={<CasesPage />} />
         <Route path="/cases/new" element={<NewCasePage />} />
         <Route path="/cases/:id" element={<CaseDetailPage />} />
@@ -83,6 +86,7 @@ function App() {
         <Router>
           <Routes>
             <Route path="/landing" element={<LandingPage />} />
+            <Route path="/" element={<LandingPage />} />
             <Route path="/*" element={<AuthenticatedApp />} />
           </Routes>
         </Router>
