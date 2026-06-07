@@ -22,7 +22,7 @@ const navItemsClient = [
   { label: 'Notifications', icon: Bell, path: '/notifications' },
 ];
 
-export default function Sidebar({ user }) {
+export default function Sidebar({ user, onClose }) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [switching, setSwitching] = useState(false);
@@ -39,7 +39,7 @@ export default function Sidebar({ user }) {
   return (
     <aside className={cn(
       'flex flex-col h-screen bg-sidebar text-white transition-all duration-300 shrink-0',
-      collapsed ? 'w-16' : 'w-60'
+      collapsed ? 'w-16' : 'w-64'
     )}>
       {/* Logo */}
       <div className={cn('flex items-center gap-3 px-4 py-5 border-b border-white/10', collapsed && 'justify-center px-0')}>
@@ -71,6 +71,7 @@ export default function Sidebar({ user }) {
             <Link
               key={path}
               to={path}
+              onClick={onClose}
               className={cn(
                 'flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors',
                 collapsed && 'justify-center px-0',
