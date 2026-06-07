@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useOutletContext } from 'react-router-dom';
+import { useOutletContext, useNavigate } from 'react-router-dom';
 import { base44 } from '@/api/base44Client';
 import { Bell, CheckCheck, AlertTriangle, Flag, MessageSquare, DollarSign, FileText } from 'lucide-react';
 import PageHeader from '@/components/shared/PageHeader';
@@ -15,8 +15,19 @@ const typeConfig = {
   new_entry: { icon: FileText, color: 'text-foreground', bg: 'bg-muted' },
 };
 
+const getNotificationPath = (n) => {
+  if (n.case_id && (n.type === 'flag_created' || n.type === 'flag_resolved' || n.type === 'new_message' || n.type === 'new_entry')) {
+    return `/cases/${n.case_id}`;
+  }
+  if (n.case_id && n.type === 'low_balance') {
+    return `/cases/${n.case_id}`;
+  }
+  return null;
+};
+
 export default function NotificationsPage() {
   const { user } = useOutletContext();
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -71,7 +82,11 @@ export default function NotificationsPage() {
             return (
               <div
                 key={n.id}
-                onClick={() => !n.read && markRead(n.id)}
+                onClick={async () => {
+                  if (!n.read) await markRead(n.id);
+                  const path = getNotificationPath(n);
+                  if (path) navigate(path);
+                }}
                 className={cn(
                   'flex items-start gap-4 p-4 rounded-xl border transition-all cursor-pointer',
                   n.read ? 'bg-card border-border opacity-60' : 'bg-card border-primary/20 shadow-sm hover:shadow-md'
