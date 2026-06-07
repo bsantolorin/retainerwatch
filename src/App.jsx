@@ -5,7 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import HomePage from '@/pages/HomePage';
 import CasesPage from '@/pages/CasesPage';
@@ -20,6 +20,21 @@ import { Toaster as Sonner } from 'sonner';
 
 const AuthenticatedApp = () => {
   const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
+  const redirected = useRef(false);
+
+  useEffect(() => {
+    if (isLoadingAuth || isLoadingPublicSettings) return;
+    if (redirected.current) return;
+
+    const needsLogin =
+      (!authError && !user) ||
+      (authError && authError.type === 'auth_required');
+
+    if (needsLogin) {
+      redirected.current = true;
+      navigateToLogin();
+    }
+  }, [isLoadingAuth, isLoadingPublicSettings, authError, user]);
 
   if (isLoadingPublicSettings || isLoadingAuth) {
     return (
@@ -32,15 +47,14 @@ const AuthenticatedApp = () => {
   if (authError) {
     if (authError.type === 'user_not_registered') {
       return <UserNotRegisteredError />;
-    } else if (authError.type === 'auth_required') {
-      navigateToLogin();
-      return null;
+    }
+    if (authError.type === 'auth_required') {
+      return null; // redirect handled in useEffect above
     }
   }
 
   if (!user) {
-    navigateToLogin();
-    return null;
+    return null; // redirect handled in useEffect above
   }
 
   return (

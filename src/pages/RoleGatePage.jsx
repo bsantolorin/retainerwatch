@@ -11,7 +11,7 @@ export default function RoleGatePage({ onRoleSet }) {
     setSetting(role);
     await base44.auth.updateMe({ role });
     toast.success(`You're now registered as ${role === 'attorney' ? 'an Attorney' : 'a Client'}.`);
-    window.location.reload();
+    if (onRoleSet) await onRoleSet();
   };
 
   return (
