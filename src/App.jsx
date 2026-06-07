@@ -5,8 +5,7 @@ import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import PageNotFound from './lib/PageNotFound';
 import { AuthProvider, useAuth } from '@/lib/AuthContext';
 import UserNotRegisteredError from '@/components/UserNotRegisteredError';
-import { useState, useEffect } from 'react';
-import { base44 } from '@/api/base44Client';
+import { useEffect } from 'react';
 import AppLayout from '@/components/layout/AppLayout';
 import HomePage from '@/pages/HomePage';
 import CasesPage from '@/pages/CasesPage';
@@ -20,15 +19,9 @@ import AttorneysPage from '@/pages/AttorneysPage';
 import { Toaster as Sonner } from 'sonner';
 
 const AuthenticatedApp = () => {
-  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin } = useAuth();
-  const [user, setUser] = useState(null);
-  const [userLoading, setUserLoading] = useState(true);
+  const { isLoadingAuth, isLoadingPublicSettings, authError, navigateToLogin, user } = useAuth();
 
-  useEffect(() => {
-    base44.auth.me().then(setUser).catch(() => {}).finally(() => setUserLoading(false));
-  }, []);
-
-  if (isLoadingPublicSettings || isLoadingAuth || userLoading) {
+  if (isLoadingPublicSettings || isLoadingAuth) {
     return (
       <div className="fixed inset-0 flex items-center justify-center bg-sidebar">
         <div className="w-8 h-8 border-4 border-white/20 border-t-white rounded-full animate-spin"></div>
