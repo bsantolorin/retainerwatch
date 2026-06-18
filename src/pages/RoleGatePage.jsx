@@ -3,9 +3,23 @@ import { base44 } from '@/api/base44Client';
 import { Scale } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
+import { applyInvitationRoleForCurrentUser } from '@/lib/applyInvitationRole';
 
 export default function RoleGatePage({ onRoleSet }) {
-  const [setting, setSetting] = useState(null);
+  const [setting, setSetting] = useState('checking');
+
+  useEffect(() => {
+    const applyInvite = async () => {
+      const role = await applyInvitationRoleForCurrentUser();
+      if (role) {
+        toast.success(`You're now registered as ${role === 'attorney' ? 'an Attorney' : 'a Client'}.`);
+        if (onRoleSet) await onRoleSet();
+        return;
+      }
+      setSetting(null);
+    };
+    applyInvite();
+  }, [onRoleSet]);
 
   const chooseRole = async (role) => {
     setSetting(role);
@@ -22,6 +36,9 @@ export default function RoleGatePage({ onRoleSet }) {
         </div>
         <h1 className="text-2xl font-bold text-foreground mb-2">Welcome to RetainerWatch</h1>
         <p className="text-muted-foreground text-sm mb-8">Select your role to continue. This sets your permissions within the platform.</p>
+        {setting === 'checking' ? (
+          <p className="text-sm text-muted-foreground animate-pulse">Checking your invitation...</p>
+        ) : (
         <div className="grid grid-cols-2 gap-4">
           <button
             onClick={() => chooseRole('attorney')}
@@ -46,7 +63,8 @@ export default function RoleGatePage({ onRoleSet }) {
             <p className="text-xs text-muted-foreground mt-1">View retainer balance, charges, and flag entries</p>
           </button>
         </div>
-        {setting && (
+        )}
+        {setting && setting !== 'checking' && (
           <p className="text-sm text-muted-foreground mt-4 animate-pulse">Setting up your account...</p>
         )}
       </div>

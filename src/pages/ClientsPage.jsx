@@ -74,7 +74,7 @@ export default function ClientsPage() {
     const fromCases = casesByClient[email];
     return { email: fromCases?.email || foundUser?.email || email, name: fromCases?.name || foundUser?.full_name, cases: fromCases?.cases || [] };
   });
-  const pendingInvites = invitations.filter(i => !userByEmail.has(i.email?.toLowerCase()));
+  const pendingInvites = invitations.filter(i => i.status === 'pending' && !userByEmail.has(i.email?.toLowerCase()));
   const filtered = clients.filter(cl => cl.name?.toLowerCase().includes(search.toLowerCase()) || cl.email?.toLowerCase().includes(search.toLowerCase()));
   const filteredPending = pendingInvites.filter(i => i.email?.toLowerCase().includes(search.toLowerCase()));
   const getFlagged = (email) => entries.filter(e => e.client_email === email && e.status === 'flagged').length;

@@ -62,7 +62,7 @@ export default function AttorneysPage() {
     acceptedMap.set(i.email?.toLowerCase(), { ...acceptedUser, role: acceptedUser.role === 'user' ? i.role : acceptedUser.role });
   });
   const acceptedAttorneys = Array.from(acceptedMap.values());
-  const pendingInvites = invitations.filter(i => !userByEmail.has(i.email?.toLowerCase()));
+  const pendingInvites = invitations.filter(i => i.status === 'pending' && !userByEmail.has(i.email?.toLowerCase()));
   const getCaseCount = (email) => cases.filter(c => c.attorney_email === email).length;
 
   const filteredAccepted = acceptedAttorneys.filter(a =>

@@ -9,6 +9,7 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp
 import AuthLayout from "@/components/AuthLayout";
 import GoogleIcon from "@/components/GoogleIcon";
 import { toast } from "@/components/ui/use-toast";
+import { applyInvitationRoleForCurrentUser } from "@/lib/applyInvitationRole";
 
 export default function Register() {
   const [email, setEmail] = useState("");
@@ -44,6 +45,7 @@ export default function Register() {
       const result = await base44.auth.verifyOtp({ email, otpCode });
       if (result?.access_token) {
         base44.auth.setToken(result.access_token);
+        await applyInvitationRoleForCurrentUser(email);
       }
       window.location.href = "/dashboard";
     } catch (err) {
