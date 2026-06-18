@@ -97,7 +97,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const from = Deno.env.get('RESEND_FROM_EMAIL') || 'RetainerWatch AI <onboarding@resend.dev>';
+    const from = Deno.env.get('RESEND_FROM_EMAIL') || 'RetainerWatch AI <no-reply@retainerwatchai.cloud>';
     const subject = `You're invited to join RetainerWatch`;
     const html = buildInviteHtml({
       inviterName: user.full_name,
