@@ -18,6 +18,6 @@ export default function HomePage() {
     }} />;
   }
 
-  if (currentUser.role === 'attorney') return <AttorneyDashboard />;
+  if (currentUser.role === 'attorney' || currentUser.role === 'admin') return <AttorneyDashboard />;
   return <ClientDashboard />;
 }

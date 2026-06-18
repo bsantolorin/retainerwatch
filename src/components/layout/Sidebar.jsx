@@ -34,6 +34,8 @@ export default function Sidebar({ user, onClose }) {
       setAdminView(v => v === 'attorney' ? 'client' : 'attorney');
       return;
     }
+    // Only non-admin attorneys can switch to client (and back)
+    if (user?.role !== 'attorney' && user?.role !== 'client') return;
     setSwitching(true);
     await base44.auth.updateMe({ role: user.role === 'attorney' ? 'client' : 'attorney' });
     window.location.href = '/dashboard';
