@@ -38,8 +38,9 @@ export default function AttorneysPage() {
     setInviteMsg('');
     try {
       await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'attorney' });
-      setInviteMsg(`Invitation sent to ${inviteEmail}`);
+      setInviteMsg('');
       setInviteEmail('');
+      setInviteOpen(false);
     } catch (e) {
       const message = e?.response?.data?.error || e?.message || 'Please try again.';
       setInviteMsg(`Failed to send invite: ${message}`);
