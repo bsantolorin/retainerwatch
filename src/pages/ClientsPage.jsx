@@ -26,10 +26,15 @@ export default function ClientsPage() {
     if (!inviteEmail) return;
     setInviting(true);
     setInviteMsg('');
-    await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'user' });
-    setInviteMsg(`Invitation sent to ${inviteEmail}`);
-    setInviteEmail('');
-    setInviting(false);
+    try {
+      await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'user' });
+      setInviteMsg(`Invitation sent to ${inviteEmail}`);
+      setInviteEmail('');
+    } catch (e) {
+      setInviteMsg('Failed to send invite. Please try again.');
+    } finally {
+      setInviting(false);
+    }
   };
 
   useEffect(() => {

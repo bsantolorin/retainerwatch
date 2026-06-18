@@ -36,10 +36,15 @@ export default function AttorneysPage() {
     if (!inviteEmail) return;
     setInviting(true);
     setInviteMsg('');
-    await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'admin' });
-    setInviteMsg(`Invitation sent to ${inviteEmail}`);
-    setInviteEmail('');
-    setInviting(false);
+    try {
+      await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'admin' });
+      setInviteMsg(`Invitation sent to ${inviteEmail}`);
+      setInviteEmail('');
+    } catch (e) {
+      setInviteMsg('Failed to send invite. Please try again.');
+    } finally {
+      setInviting(false);
+    }
   };
 
   const getCaseCount = (email) => cases.filter(c => c.attorney_email === email).length;
