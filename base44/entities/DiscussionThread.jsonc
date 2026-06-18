@@ -66,5 +66,64 @@
   "required": [
     "billing_entry_id",
     "case_id"
-  ]
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        },
+        {
+          "data.client_email": "{{user.email}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        },
+        {
+          "data.client_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        },
+        {
+          "data.client_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        }
+      ]
+    }
+  }
 }
