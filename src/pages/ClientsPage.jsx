@@ -26,7 +26,7 @@ export default function ClientsPage() {
     if (!inviteEmail) return;
     setInviting(true);
     setInviteMsg('');
-    await base44.users.inviteUser(inviteEmail, 'user');
+    await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'user' });
     setInviteMsg(`Invitation sent to ${inviteEmail}`);
     setInviteEmail('');
     setInviting(false);

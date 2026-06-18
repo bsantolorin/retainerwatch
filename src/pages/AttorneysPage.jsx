@@ -36,7 +36,7 @@ export default function AttorneysPage() {
     if (!inviteEmail) return;
     setInviting(true);
     setInviteMsg('');
-    await base44.users.inviteUser(inviteEmail, 'admin');
+    await base44.functions.invoke('sendInviteEmail', { email: inviteEmail, role: 'admin' });
     setInviteMsg(`Invitation sent to ${inviteEmail}`);
     setInviteEmail('');
     setInviting(false);
