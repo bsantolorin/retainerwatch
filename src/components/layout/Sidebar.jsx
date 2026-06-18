@@ -27,14 +27,21 @@ export default function Sidebar({ user, onClose }) {
   const [collapsed, setCollapsed] = useState(false);
   const [switching, setSwitching] = useState(false);
   const isAdmin = user?.role === 'admin';
-  const isAttorney = user?.role === 'attorney' || isAdmin;
+  const [adminView, setAdminView] = useState('attorney'); // admin's current view
 
   const switchRole = async () => {
+    if (isAdmin) {
+      setAdminView(v => v === 'attorney' ? 'client' : 'attorney');
+      return;
+    }
     setSwitching(true);
-    await base44.auth.updateMe({ role: isAttorney && !isAdmin ? 'client' : 'attorney' });
+    await base44.auth.updateMe({ role: user.role === 'attorney' ? 'client' : 'attorney' });
     window.location.href = '/dashboard';
   };
-  const navItems = isAttorney ? navItemsAttorney : navItemsClient;
+
+  const effectiveView = isAdmin ? adminView : user?.role;
+  const isAttorneyView = effectiveView === 'attorney';
+  const navItems = isAttorneyView ? navItemsAttorney : navItemsClient;
 
   return (
     <aside className={cn(
@@ -56,9 +63,9 @@ export default function Sidebar({ user, onClose }) {
         <div className="px-4 pt-4 pb-2">
           <span className={cn(
             'text-xs font-medium px-2 py-1 rounded-full',
-            isAttorney ? 'bg-primary/20 text-primary' : 'bg-amber/20 text-amber'
+            isAttorneyView ? 'bg-primary/20 text-primary' : 'bg-amber/20 text-amber'
           )}>
-            {isAttorney ? 'Attorney' : 'Client'}
+            {isAdmin ? `Admin (${adminView === 'attorney' ? 'Attorney' : 'Client'} view)` : (isAttorneyView ? 'Attorney' : 'Client')}
           </span>
         </div>
       )}
@@ -96,15 +103,14 @@ export default function Sidebar({ user, onClose }) {
             <p className="text-xs text-white/40 truncate">{user?.email}</p>
           </div>
         )}
-        {!isAdmin && user?.role === 'attorney' && (
+        {isAdmin && (
           <button
             onClick={switchRole}
-            disabled={switching}
-            className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50', collapsed && 'justify-center')}
-            title={collapsed ? 'Switch to Client' : undefined}
+            className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors', collapsed && 'justify-center')}
+            title={collapsed ? `Switch to ${adminView === 'attorney' ? 'Client' : 'Attorney'} view` : undefined}
           >
             <ArrowLeftRight className="w-4 h-4 shrink-0" />
-            {!collapsed && <span>{switching ? 'Switching…' : 'Switch to Client'}</span>}
+            {!collapsed && <span>Switch to {adminView === 'attorney' ? 'Client' : 'Attorney'} view</span>}
           </button>
         )}
         <button
