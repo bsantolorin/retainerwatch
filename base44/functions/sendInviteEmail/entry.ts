@@ -50,7 +50,7 @@ function buildInviteHtml({ inviterName, inviterEmail, invitedEmail, role }) {
               <table cellpadding="0" cellspacing="0" style="margin:0 auto 32px;">
                 <tr>
                   <td align="center" style="border-radius:8px;background:linear-gradient(135deg,#2563eb,#1d4ed8);">
-                    <a href="https://retainerwatch.base44.app/register" style="display:inline-block;padding:14px 36px;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">Accept Invitation →</a>
+                    <a href="https://retainerwatchai.cloud/register" style="display:inline-block;padding:14px 36px;color:#ffffff;font-size:16px;font-weight:600;text-decoration:none;letter-spacing:0.3px;">Accept Invitation →</a>
                   </td>
                 </tr>
               </table>
