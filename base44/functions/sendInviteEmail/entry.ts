@@ -88,7 +88,7 @@ Deno.serve(async (req) => {
 
     if (sendPlatformInvite) {
       try {
-        await base44.auth.inviteUser(email, 'user');
+        await base44.users.inviteUser(email, 'user');
       } catch (inviteErr) {
         const msg = inviteErr?.message?.toLowerCase() || '';
         if (!msg.includes('already') && !msg.includes('exist') && !msg.includes('registered')) {
