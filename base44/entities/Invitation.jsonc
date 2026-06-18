@@ -1,0 +1,92 @@
+{
+  "name": "Invitation",
+  "type": "object",
+  "properties": {
+    "email": {
+      "type": "string",
+      "description": "Invited user email"
+    },
+    "role": {
+      "type": "string",
+      "enum": [
+        "attorney",
+        "client"
+      ],
+      "description": "Portal role being invited"
+    },
+    "invited_by_email": {
+      "type": "string",
+      "description": "Email of the user who sent the invitation"
+    },
+    "invited_by_name": {
+      "type": "string",
+      "description": "Name of the user who sent the invitation"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "pending",
+        "accepted"
+      ],
+      "default": "pending"
+    },
+    "sent_at": {
+      "type": "string",
+      "description": "When the invitation email was sent"
+    },
+    "resend_id": {
+      "type": "string",
+      "description": "Resend message ID"
+    }
+  },
+  "required": [
+    "email",
+    "role",
+    "invited_by_email"
+  ],
+  "rls": {
+    "create": true,
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.invited_by_email": "{{user.email}}"
+        },
+        {
+          "data.email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.invited_by_email": "{{user.email}}"
+        },
+        {
+          "data.email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.invited_by_email": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}
