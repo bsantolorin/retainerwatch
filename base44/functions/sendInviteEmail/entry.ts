@@ -9,7 +9,11 @@ Deno.serve(async (req) => {
     const { email, role } = await req.json();
     if (!email) return Response.json({ error: 'Email required' }, { status: 400 });
 
-    // Send platform invite
+    // Always invite as 'user' (default role) to avoid admin-only restrictions.
+    // The app uses custom roles (attorney/client) set separately after registration.
+    await base44.auth.inviteUser(email, 'user');
+
+    // Then send branded email (best-effort, may fail for unregistered users)
     await base44.asServiceRole.integrations.Core.SendEmail({
       to: email,
       from_name: 'RetainerWatch AI',
@@ -109,7 +113,7 @@ Deno.serve(async (req) => {
   </table>
 </body>
 </html>`
-    });
+    }).catch(() => {}); // branded email is best-effort
 
     return Response.json({ success: true });
   } catch (error) {
