@@ -26,12 +26,12 @@ export default function Sidebar({ user, onClose }) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [switching, setSwitching] = useState(false);
-  const isAttorney = user?.role === 'attorney';
   const isAdmin = user?.role === 'admin';
+  const isAttorney = user?.role === 'attorney' || isAdmin;
 
   const switchRole = async () => {
     setSwitching(true);
-    await base44.auth.updateMe({ role: isAttorney ? 'client' : 'attorney' });
+    await base44.auth.updateMe({ role: isAttorney && !isAdmin ? 'client' : 'attorney' });
     window.location.href = '/dashboard';
   };
   const navItems = isAttorney ? navItemsAttorney : navItemsClient;
@@ -96,15 +96,15 @@ export default function Sidebar({ user, onClose }) {
             <p className="text-xs text-white/40 truncate">{user?.email}</p>
           </div>
         )}
-        {isAdmin && (
+        {!isAdmin && user?.role === 'attorney' && (
           <button
             onClick={switchRole}
             disabled={switching}
             className={cn('w-full flex items-center gap-3 px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/5 transition-colors disabled:opacity-50', collapsed && 'justify-center')}
-            title={collapsed ? `Switch to ${isAttorney ? 'Client' : 'Attorney'}` : undefined}
+            title={collapsed ? 'Switch to Client' : undefined}
           >
             <ArrowLeftRight className="w-4 h-4 shrink-0" />
-            {!collapsed && <span>{switching ? 'Switching…' : `Switch to ${isAttorney ? 'Client' : 'Attorney'}`}</span>}
+            {!collapsed && <span>{switching ? 'Switching…' : 'Switch to Client'}</span>}
           </button>
         )}
         <button
