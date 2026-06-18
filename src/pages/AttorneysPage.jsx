@@ -83,7 +83,7 @@ export default function AttorneysPage() {
               onChange={e => setInviteEmail(e.target.value)}
               onKeyDown={e => e.key === 'Enter' && handleInvite()}
             />
-            {inviteMsg && <p className="text-sm text-green-600">{inviteMsg}</p>}
+            {inviteMsg && <p className={`text-sm ${inviteMsg.startsWith('Failed') ? 'text-destructive' : 'text-green-600'}`}>{inviteMsg}</p>}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setInviteOpen(false)}>Cancel</Button>

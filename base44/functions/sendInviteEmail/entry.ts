@@ -11,7 +11,15 @@ Deno.serve(async (req) => {
 
     // Always invite as 'user' (default role) to avoid admin-only restrictions.
     // The app uses custom roles (attorney/client) set separately after registration.
-    await base44.auth.inviteUser(email, 'user');
+    try {
+      await base44.auth.inviteUser(email, 'user');
+    } catch (inviteErr) {
+      // If user is already registered/invited, continue and still send branded email
+      const msg = inviteErr?.message?.toLowerCase() || '';
+      if (!msg.includes('already') && !msg.includes('exist') && !msg.includes('registered')) {
+        throw inviteErr;
+      }
+    }
 
     // Then send branded email (best-effort, may fail for unregistered users)
     await base44.asServiceRole.integrations.Core.SendEmail({
