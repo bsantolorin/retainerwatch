@@ -11,7 +11,7 @@ import AddBillingEntryModal from '@/components/billing/AddBillingEntryModal';
 
 export default function BillingPage() {
   const { user } = useOutletContext();
-  const isAttorney = user?.role === 'attorney';
+  const isAttorney = user?.role === 'attorney' || user?.role === 'admin';
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -27,7 +27,7 @@ export default function BillingPage() {
     });
   };
 
-  useEffect(() => { load(); }, [user.email]);
+  useEffect(() => { load(); }, [user.email, isAttorney]);
 
   const filtered = entries.filter(e => {
     const matchSearch = e.description?.toLowerCase().includes(search.toLowerCase()) || e.case_title?.toLowerCase().includes(search.toLowerCase());
