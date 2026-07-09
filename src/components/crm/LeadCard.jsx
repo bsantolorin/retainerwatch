@@ -2,7 +2,7 @@ import { Mail, Phone, UserRound, CalendarClock } from 'lucide-react';
 
 export default function LeadCard({ lead, onEdit }) {
   return (
-    <button onClick={() => onEdit(lead)} className="w-full text-left bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow">
+    <div className="w-full bg-card border border-border rounded-xl p-4 shadow-sm hover:shadow-md transition-shadow cursor-grab active:cursor-grabbing">
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="font-semibold text-foreground">{lead.name}</h3>
@@ -16,6 +16,7 @@ export default function LeadCard({ lead, onEdit }) {
         {lead.referred_by && <p className="flex items-center gap-2"><UserRound className="w-3.5 h-3.5" />Referred by {lead.referred_by}</p>}
         {lead.next_follow_up && <p className="flex items-center gap-2 text-amber"><CalendarClock className="w-3.5 h-3.5" />Follow up {lead.next_follow_up}</p>}
       </div>
-    </button>
+      <button onClick={() => onEdit(lead)} className="mt-3 text-xs font-medium text-primary hover:underline">Edit lead</button>
+    </div>
   );
 }
