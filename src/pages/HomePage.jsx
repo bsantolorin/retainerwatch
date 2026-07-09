@@ -6,7 +6,7 @@ import ClientDashboard from './ClientDashboard';
 import { useOutletContext } from 'react-router-dom';
 
 export default function HomePage() {
-  const { user } = useOutletContext();
+  const { user, effectiveView } = useOutletContext();
   const [currentUser, setCurrentUser] = useState(user);
 
   useEffect(() => { setCurrentUser(user); }, [user]);
@@ -18,6 +18,7 @@ export default function HomePage() {
     }} />;
   }
 
+  if (effectiveView === 'client') return <ClientDashboard />;
   if (currentUser.role === 'attorney' || currentUser.role === 'admin') return <AttorneyDashboard />;
   return <ClientDashboard />;
 }

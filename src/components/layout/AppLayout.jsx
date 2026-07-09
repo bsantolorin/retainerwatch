@@ -6,6 +6,8 @@ import { Menu } from 'lucide-react';
 
 export default function AppLayout({ user }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [adminView, setAdminView] = useState('attorney');
+  const effectiveView = user?.role === 'admin' ? adminView : user?.role;
 
   return (
     <div className="flex h-screen overflow-hidden bg-background">
@@ -23,7 +25,7 @@ export default function AppLayout({ user }) {
         transition-transform duration-300
         ${mobileOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
       `}>
-        <Sidebar user={user} onClose={() => setMobileOpen(false)} />
+        <Sidebar user={user} adminView={adminView} setAdminView={setAdminView} onClose={() => setMobileOpen(false)} />
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
@@ -39,7 +41,7 @@ export default function AppLayout({ user }) {
           {user && <NotificationsBell user={user} />}
         </header>
         <main className="flex-1 overflow-y-auto">
-          <Outlet context={{ user }} />
+          <Outlet context={{ user, effectiveView }} />
         </main>
       </div>
     </div>

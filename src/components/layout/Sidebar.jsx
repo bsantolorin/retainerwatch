@@ -32,12 +32,11 @@ const navItemsClient = [
   { label: 'Notifications', icon: Bell, path: '/notifications' },
 ];
 
-export default function Sidebar({ user, onClose }) {
+export default function Sidebar({ user, adminView, setAdminView, onClose }) {
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
   const [switching, setSwitching] = useState(false);
   const isAdmin = user?.role === 'admin';
-  const [adminView, setAdminView] = useState('attorney'); // admin's current view
 
   const switchRole = async () => {
     if (isAdmin) {
