@@ -1,0 +1,137 @@
+{
+  "name": "PracticeTask",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Task title"
+    },
+    "description": {
+      "type": "string",
+      "description": "Task details"
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Related case ID"
+    },
+    "case_title": {
+      "type": "string",
+      "description": "Related case title"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Task creator or managing attorney email"
+    },
+    "assigned_to_email": {
+      "type": "string",
+      "description": "Assigned staff email"
+    },
+    "assigned_to_name": {
+      "type": "string",
+      "description": "Assigned staff display name"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Related client email"
+    },
+    "due_date": {
+      "type": "string",
+      "format": "date",
+      "description": "Due date"
+    },
+    "priority": {
+      "type": "string",
+      "enum": [
+        "low",
+        "medium",
+        "high",
+        "urgent"
+      ],
+      "default": "medium"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "todo",
+        "in_progress",
+        "blocked",
+        "done"
+      ],
+      "default": "todo"
+    },
+    "client_visible": {
+      "type": "boolean",
+      "default": false
+    }
+  },
+  "required": [
+    "title",
+    "owner_email"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "data.assigned_to_email": "{{user.email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.client_email": "{{user.email}}"
+            },
+            {
+              "data.client_visible": true
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "data.assigned_to_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}
