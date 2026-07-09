@@ -6,10 +6,10 @@ import { format } from 'date-fns';
 import DiscussionThreadModal from '@/components/discussion/DiscussionThreadModal';
 import FlagEntryModal from '@/components/billing/FlagEntryModal';
 
-export default function BillingEntryRow({ entry, user, onUpdate }) {
+export default function BillingEntryRow({ entry, user, viewRole, onUpdate }) {
   const [showThread, setShowThread] = useState(false);
   const [showFlag, setShowFlag] = useState(false);
-  const isAttorney = user?.role === 'attorney';
+  const isAttorney = viewRole ? viewRole !== 'client' : user?.role === 'attorney' || user?.role === 'admin';
 
   return (
     <>

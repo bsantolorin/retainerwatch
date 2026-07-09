@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
@@ -34,6 +34,7 @@ const navItemsClient = [
 
 export default function Sidebar({ user, adminView, setAdminView, onClose }) {
   const location = useLocation();
+  const navigate = useNavigate();
   const [collapsed, setCollapsed] = useState(false);
   const [switching, setSwitching] = useState(false);
   const isAdmin = user?.role === 'admin';
@@ -41,6 +42,7 @@ export default function Sidebar({ user, adminView, setAdminView, onClose }) {
   const switchRole = async () => {
     if (isAdmin) {
       setAdminView(v => v === 'attorney' ? 'client' : 'attorney');
+      navigate('/dashboard');
       return;
     }
     // Only non-admin attorneys can switch to client (and back)

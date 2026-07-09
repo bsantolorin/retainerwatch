@@ -8,7 +8,7 @@ const statusStyles = {
   archived: 'bg-slate-100 text-slate-600',
 };
 
-export default function DocumentCard({ document }) {
+export default function DocumentCard({ document, canManage = false }) {
   return (
     <div className="bg-card border border-border rounded-2xl p-5 shadow-sm">
       <div className="flex items-start justify-between gap-4">
@@ -24,7 +24,7 @@ export default function DocumentCard({ document }) {
       <div className="grid grid-cols-2 gap-3 mt-4 text-xs text-muted-foreground">
         <p>Category: <span className="font-medium text-foreground">{document.category || 'other'}</span></p>
         <p>Version: <span className="font-medium text-foreground">{document.version || 'v1'}</span></p>
-        <p className="flex items-center gap-1">{document.client_visible ? <Eye className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}{document.client_visible ? 'Client visible' : 'Internal only'}</p>
+        {canManage && <p className="flex items-center gap-1">{document.client_visible ? <Eye className="w-3.5 h-3.5" /> : <Lock className="w-3.5 h-3.5" />}{document.client_visible ? 'Client visible' : 'Internal only'}</p>}
         <p className="truncate">{document.file_name}</p>
       </div>
       {document.notes && <p className="text-sm text-muted-foreground mt-4 line-clamp-2">{document.notes}</p>}

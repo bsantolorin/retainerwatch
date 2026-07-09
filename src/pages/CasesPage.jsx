@@ -8,8 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 
 export default function CasesPage() {
-  const { user } = useOutletContext();
-  const isAttorney = user?.role === 'attorney' || user?.role === 'admin';
+  const { user, effectiveView } = useOutletContext();
+  const isAttorney = effectiveView !== 'client';
   const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');

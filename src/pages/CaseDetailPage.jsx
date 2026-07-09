@@ -11,9 +11,9 @@ import BillingEntryRow from '@/components/billing/BillingEntryRow';
 import NewBillingEntryModal from '@/components/billing/NewBillingEntryModal';
 
 export default function CaseDetailPage() {
-  const { user } = useOutletContext();
+  const { user, effectiveView } = useOutletContext();
   const { id } = useParams();
-  const isAttorney = user?.role === 'attorney';
+  const isAttorney = effectiveView !== 'client';
   const [caseData, setCaseData] = useState(null);
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -88,6 +88,7 @@ export default function CaseDetailPage() {
                 key={entry.id}
                 entry={entry}
                 user={user}
+                viewRole={effectiveView}
                 onUpdate={reload}
               />
             ))}

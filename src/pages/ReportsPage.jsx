@@ -1,18 +1,19 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts';
 import { base44 } from '@/api/base44Client';
 import PageHeader from '@/components/shared/PageHeader';
 import ReportMetric from '@/components/reports/ReportMetric';
 
 export default function ReportsPage() {
+  const { user, effectiveView } = useOutletContext();
   const [data, setData] = useState({ cases: [], billing: [], leads: [], tasks: [], events: [], documents: [] });
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [effectiveView]);
 
   const loadData = async () => {
-    const user = await base44.auth.me();
-    const canViewLeads = user.role === 'admin' || user.role === 'attorney';
+    const canViewLeads = effectiveView !== 'client';
     const [cases, billing, leads, tasks, events, documents] = await Promise.all([
       base44.entities.Case.list('-updated_date'),
       base44.entities.BillingEntry.list('-date'),
@@ -21,7 +22,18 @@ export default function ReportsPage() {
       base44.entities.CalendarEvent.list('-start'),
       base44.entities.CaseDocument.list('-updated_date'),
     ]);
-    setData({ cases, billing, leads, tasks, events, documents });
+    if (effectiveView === 'client') {
+      setData({
+        cases: cases.filter(item => item.client_email === user.email),
+        billing: billing.filter(item => item.client_email === user.email),
+        leads: [],
+        tasks: tasks.filter(item => item.client_visible && item.client_email === user.email),
+        events: events.filter(item => item.client_email === user.email),
+        documents: documents.filter(item => item.client_visible && item.client_email === user.email),
+      });
+    } else {
+      setData({ cases, billing, leads, tasks, events, documents });
+    }
     setLoading(false);
   };
 
@@ -49,12 +61,12 @@ export default function ReportsPage() {
 
   return (
     <div className="space-y-6">
-      <PageHeader title="Reports" subtitle="Operational visibility across cases, billing, CRM, tasks, calendar, and documents." />
+      <PageHeader title={effectiveView === 'client' ? "My Portal Report" : "Reports"} subtitle={effectiveView === 'client' ? "A personal summary of your cases, charges, tasks, events, and documents." : "Operational visibility across cases, billing, CRM, tasks, calendar, and documents."} />
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         <ReportMetric label="Active Cases" value={stats.activeCases} hint="Open and pending matters" />
         <ReportMetric label="Retainer Balance" value={`$${stats.retainerBalance.toLocaleString()}`} hint="Current accessible balance" />
         <ReportMetric label="Total Billed" value={`$${stats.billedTotal.toLocaleString()}`} hint="Accessible billing entries" />
-        <ReportMetric label="Active Leads" value={stats.activeLeads} hint="Open CRM opportunities" />
+        {effectiveView !== 'client' && <ReportMetric label="Active Leads" value={stats.activeLeads} hint="Open CRM opportunities" />}
         <ReportMetric label="Flagged Charges" value={stats.flaggedBilling} hint="Needs review" />
         <ReportMetric label="Overdue Tasks" value={stats.overdueTasks} hint="Incomplete past due tasks" />
         <ReportMetric label="Upcoming Events" value={stats.upcomingEvents} hint="Scheduled calendar items" />

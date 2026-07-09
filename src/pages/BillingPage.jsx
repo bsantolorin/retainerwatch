@@ -10,8 +10,8 @@ import BillingEntryRow from '@/components/billing/BillingEntryRow';
 import AddBillingEntryModal from '@/components/billing/AddBillingEntryModal';
 
 export default function BillingPage() {
-  const { user } = useOutletContext();
-  const isAttorney = user?.role === 'attorney' || user?.role === 'admin';
+  const { user, effectiveView } = useOutletContext();
+  const isAttorney = effectiveView !== 'client';
   const [entries, setEntries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
@@ -90,7 +90,7 @@ export default function BillingPage() {
         ) : (
           <div className="divide-y divide-border">
             {filtered.map(entry => (
-              <BillingEntryRow key={entry.id} entry={entry} user={user} onUpdate={load} />
+              <BillingEntryRow key={entry.id} entry={entry} user={user} viewRole={effectiveView} onUpdate={load} />
             ))}
           </div>
         )}

@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { useOutletContext } from 'react-router-dom';
 import { FileUp, Search } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 import { Button } from '@/components/ui/button';
@@ -8,7 +9,7 @@ import DocumentCard from '@/components/documents/DocumentCard';
 import DocumentUploadModal from '@/components/documents/DocumentUploadModal';
 
 export default function DocumentsPage() {
-  const [user, setUser] = useState(null);
+  const { user, effectiveView } = useOutletContext();
   const [cases, setCases] = useState([]);
   const [documents, setDocuments] = useState([]);
   const [query, setQuery] = useState('');
@@ -16,19 +17,18 @@ export default function DocumentsPage() {
   const [uploading, setUploading] = useState(false);
   const [showUpload, setShowUpload] = useState(false);
 
-  useEffect(() => { loadData(); }, []);
+  useEffect(() => { loadData(); }, [effectiveView]);
 
   const loadData = async () => {
     setLoading(true);
-    const currentUser = await base44.auth.me();
     const [caseList, documentList] = await Promise.all([base44.entities.Case.list('-updated_date'), base44.entities.CaseDocument.list('-updated_date')]);
-    setUser(currentUser);
+    const visibleDocuments = effectiveView === 'client' ? documentList.filter(document => document.client_visible) : documentList;
     setCases(caseList);
-    setDocuments(documentList);
+    setDocuments(visibleDocuments);
     setLoading(false);
   };
 
-  const canManage = user?.role === 'admin' || user?.role === 'attorney';
+  const canManage = effectiveView !== 'client';
   const filteredDocuments = useMemo(() => documents.filter(doc => [doc.title, doc.case_title, doc.category, doc.status, doc.file_name].join(' ').toLowerCase().includes(query.toLowerCase())), [documents, query]);
 
   const uploadDocument = async (form, file) => {
@@ -45,10 +45,10 @@ export default function DocumentsPage() {
 
   return (
     <div>
-      <PageHeader title="Document Management" subtitle="Centralized, searchable, version-labeled case files for staff and client portal access." actions={canManage && <Button onClick={() => setShowUpload(true)} disabled={!cases.length}><FileUp className="w-4 h-4" /> Upload Document</Button>} />
+      <PageHeader title={canManage ? "Document Management" : "My Documents"} subtitle={canManage ? "Centralized, searchable, version-labeled case files for staff and client portal access." : "Documents shared with you through the client portal."} actions={canManage && <Button onClick={() => setShowUpload(true)} disabled={!cases.length}><FileUp className="w-4 h-4" /> Upload Document</Button>} />
       <div className="relative max-w-md mb-5"><Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" /><Input className="pl-9" placeholder="Search documents, cases, categories..." value={query} onChange={(e) => setQuery(e.target.value)} /></div>
       {!cases.length && canManage && <div className="rounded-xl border border-dashed border-border bg-muted/30 p-6 text-sm text-muted-foreground mb-5">Create a case first before uploading case documents.</div>}
-      {filteredDocuments.length ? <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{filteredDocuments.map(document => <DocumentCard key={document.id} document={document} />)}</div> : <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center text-muted-foreground">No documents found.</div>}
+      {filteredDocuments.length ? <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">{filteredDocuments.map(document => <DocumentCard key={document.id} document={document} canManage={canManage} />)}</div> : <div className="rounded-2xl border border-dashed border-border bg-muted/30 p-10 text-center text-muted-foreground">No documents found.</div>}
       {showUpload && <DocumentUploadModal cases={cases} onClose={() => setShowUpload(false)} onUpload={uploadDocument} uploading={uploading} />}
     </div>
   );
