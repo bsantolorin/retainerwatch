@@ -17,6 +17,7 @@ import CalendarPage from '@/pages/CalendarPage';
 import DocumentsPage from '@/pages/DocumentsPage';
 import AIAssistantPage from '@/pages/AIAssistantPage';
 import TasksPage from '@/pages/TasksPage';
+import ReportsPage from '@/pages/ReportsPage';
 import ClientsPage from '@/pages/ClientsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import LogBillingEntryPage from '@/pages/LogBillingEntryPage';
@@ -83,6 +84,7 @@ const AuthenticatedApp = () => {
         <Route path="/documents" element={<DocumentsPage />} />
         <Route path="/ai" element={<AIAssistantPage />} />
         <Route path="/tasks" element={<TasksPage />} />
+        <Route path="/reports" element={<ReportsPage />} />
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/billing/new" element={<LogBillingEntryPage />} />

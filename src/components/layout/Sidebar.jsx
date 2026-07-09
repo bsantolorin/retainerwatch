@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { useState } from 'react';
 import { cn } from '@/lib/utils';
 import {
-  LayoutDashboard, Briefcase, FileText, Bell, Users, ChevronLeft, ChevronRight, Scale, LogOut, ArrowLeftRight, Columns3, CalendarDays, FolderOpen, Sparkles, ClipboardList
+  LayoutDashboard, Briefcase, FileText, Bell, Users, ChevronLeft, ChevronRight, Scale, LogOut, ArrowLeftRight, Columns3, CalendarDays, FolderOpen, Sparkles, ClipboardList, BarChart3
 } from 'lucide-react';
 import { base44 } from '@/api/base44Client';
 
@@ -15,6 +15,7 @@ const navItemsAttorney = [
   { label: 'Documents', icon: FolderOpen, path: '/documents' },
   { label: 'AI Assistant', icon: Sparkles, path: '/ai' },
   { label: 'Tasks', icon: ClipboardList, path: '/tasks' },
+  { label: 'Reports', icon: BarChart3, path: '/reports' },
   { label: 'Clients', icon: Users, path: '/clients' },
   { label: 'Attorneys', icon: Scale, path: '/attorneys' },
   { label: 'Notifications', icon: Bell, path: '/notifications' },
@@ -27,6 +28,7 @@ const navItemsClient = [
   { label: 'Documents', icon: FolderOpen, path: '/documents' },
   { label: 'AI Assistant', icon: Sparkles, path: '/ai' },
   { label: 'Tasks', icon: ClipboardList, path: '/tasks' },
+  { label: 'Reports', icon: BarChart3, path: '/reports' },
   { label: 'Notifications', icon: Bell, path: '/notifications' },
 ];
 
