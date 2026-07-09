@@ -1,0 +1,146 @@
+{
+  "name": "CaseDocument",
+  "type": "object",
+  "properties": {
+    "title": {
+      "type": "string",
+      "description": "Document title"
+    },
+    "case_id": {
+      "type": "string",
+      "description": "Related case ID"
+    },
+    "case_title": {
+      "type": "string",
+      "description": "Related case title"
+    },
+    "client_email": {
+      "type": "string",
+      "description": "Client email allowed to view client-visible documents"
+    },
+    "attorney_email": {
+      "type": "string",
+      "description": "Attorney owner email"
+    },
+    "category": {
+      "type": "string",
+      "enum": [
+        "pleading",
+        "contract",
+        "evidence",
+        "correspondence",
+        "billing",
+        "court",
+        "other"
+      ],
+      "default": "other"
+    },
+    "version": {
+      "type": "string",
+      "description": "Version label such as v1, v2, or Final"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "draft",
+        "final",
+        "signed",
+        "archived"
+      ],
+      "default": "draft"
+    },
+    "file_url": {
+      "type": "string",
+      "description": "Uploaded file URL"
+    },
+    "file_name": {
+      "type": "string",
+      "description": "Original file name"
+    },
+    "file_type": {
+      "type": "string",
+      "description": "File MIME type"
+    },
+    "client_visible": {
+      "type": "boolean",
+      "default": false
+    },
+    "uploaded_by_email": {
+      "type": "string",
+      "description": "Uploader email"
+    },
+    "uploaded_by_name": {
+      "type": "string",
+      "description": "Uploader name"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Internal document notes"
+    }
+  },
+  "required": [
+    "title",
+    "case_id",
+    "file_url"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        },
+        {
+          "$and": [
+            {
+              "data.client_email": "{{user.email}}"
+            },
+            {
+              "data.client_visible": true
+            }
+          ]
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.attorney_email": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}
