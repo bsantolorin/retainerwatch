@@ -1,0 +1,142 @@
+{
+  "name": "Lead",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Lead or contact name"
+    },
+    "company": {
+      "type": "string",
+      "description": "Organization or business name"
+    },
+    "email": {
+      "type": "string",
+      "description": "Lead email address"
+    },
+    "phone": {
+      "type": "string",
+      "description": "Lead phone number"
+    },
+    "source": {
+      "type": "string",
+      "description": "Lead source such as referral, website, or consultation"
+    },
+    "referred_by": {
+      "type": "string",
+      "description": "Referral source or person"
+    },
+    "stage_id": {
+      "type": "string",
+      "description": "Pipeline stage ID"
+    },
+    "stage_name": {
+      "type": "string",
+      "description": "Pipeline stage label"
+    },
+    "estimated_value": {
+      "type": "number",
+      "description": "Estimated case value"
+    },
+    "next_follow_up": {
+      "type": "string",
+      "format": "date",
+      "description": "Next follow-up date"
+    },
+    "owner_email": {
+      "type": "string",
+      "description": "Primary owner email"
+    },
+    "assigned_attorney_email": {
+      "type": "string",
+      "description": "Assigned attorney email"
+    },
+    "assigned_attorney_name": {
+      "type": "string",
+      "description": "Assigned attorney name"
+    },
+    "status": {
+      "type": "string",
+      "enum": [
+        "active",
+        "retained",
+        "lost",
+        "closed"
+      ],
+      "default": "active"
+    },
+    "notes": {
+      "type": "string",
+      "description": "Relationship and intake notes"
+    },
+    "custom_fields": {
+      "type": "object",
+      "description": "Additional firm-defined lead fields"
+    }
+  },
+  "required": [
+    "name",
+    "stage_name"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "attorney"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "data.assigned_attorney_email": "{{user.email}}"
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "data.assigned_attorney_email": "{{user.email}}"
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "data.owner_email": "{{user.email}}"
+        },
+        {
+          "data.assigned_attorney_email": "{{user.email}}"
+        }
+      ]
+    }
+  }
+}

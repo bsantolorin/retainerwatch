@@ -1,0 +1,84 @@
+{
+  "name": "PipelineStage",
+  "type": "object",
+  "properties": {
+    "name": {
+      "type": "string",
+      "description": "Stage name"
+    },
+    "color": {
+      "type": "string",
+      "description": "Tailwind color key for stage accents"
+    },
+    "position": {
+      "type": "number",
+      "description": "Display order"
+    },
+    "active": {
+      "type": "boolean",
+      "default": true
+    }
+  },
+  "required": [
+    "name",
+    "position"
+  ],
+  "rls": {
+    "create": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "attorney"
+          }
+        }
+      ]
+    },
+    "read": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "attorney"
+          }
+        }
+      ]
+    },
+    "update": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "attorney"
+          }
+        }
+      ]
+    },
+    "delete": {
+      "$or": [
+        {
+          "user_condition": {
+            "role": "admin"
+          }
+        },
+        {
+          "user_condition": {
+            "role": "attorney"
+          }
+        }
+      ]
+    }
+  }
+}

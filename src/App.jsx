@@ -12,6 +12,8 @@ import CasesPage from '@/pages/CasesPage';
 import CaseDetailPage from '@/pages/CaseDetailPage';
 import NewCasePage from '@/pages/NewCasePage';
 import BillingPage from '@/pages/BillingPage';
+import CRMPage from '@/pages/CRMPage';
+import CalendarPage from '@/pages/CalendarPage';
 import ClientsPage from '@/pages/ClientsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import LogBillingEntryPage from '@/pages/LogBillingEntryPage';
@@ -73,6 +75,8 @@ const AuthenticatedApp = () => {
         <Route path="/cases/new" element={<NewCasePage />} />
         <Route path="/cases/:id" element={<CaseDetailPage />} />
         <Route path="/billing" element={<BillingPage />} />
+        <Route path="/crm" element={<CRMPage />} />
+        <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/billing/new" element={<LogBillingEntryPage />} />
