@@ -15,6 +15,7 @@ import BillingPage from '@/pages/BillingPage';
 import CRMPage from '@/pages/CRMPage';
 import CalendarPage from '@/pages/CalendarPage';
 import DocumentsPage from '@/pages/DocumentsPage';
+import AIAssistantPage from '@/pages/AIAssistantPage';
 import ClientsPage from '@/pages/ClientsPage';
 import NotificationsPage from '@/pages/NotificationsPage';
 import LogBillingEntryPage from '@/pages/LogBillingEntryPage';
@@ -79,6 +80,7 @@ const AuthenticatedApp = () => {
         <Route path="/crm" element={<CRMPage />} />
         <Route path="/calendar" element={<CalendarPage />} />
         <Route path="/documents" element={<DocumentsPage />} />
+        <Route path="/ai" element={<AIAssistantPage />} />
         <Route path="/clients" element={<ClientsPage />} />
         <Route path="/notifications" element={<NotificationsPage />} />
         <Route path="/billing/new" element={<LogBillingEntryPage />} />
